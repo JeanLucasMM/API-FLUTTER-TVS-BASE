@@ -28,6 +28,8 @@ router.get("/pedidos/:idPedido", PedidoController.getPedidoById);
 router.post("/incluirPedido", PedidoController.incluirPedido);
 router.put("/atualizarPedido/:id", PedidoController.atualizarPedido);
 router.delete("/excluirPedido/:id", PedidoController.excluirPedido);
+router.post("/clientes/:idCliente/pedidos", PedidoController.criarPedidoParaCliente);
+router.get("/clientes/:idCliente/pedidos", PedidoController.getClienteComPedidos);
 
 // ITENS DO PEDIDO
 router.get("/itensDoPedido", ItemDoPedidoController.listarItensDoPedido);

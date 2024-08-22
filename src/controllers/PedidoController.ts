@@ -39,6 +39,53 @@ export const listarPedidos = async (req: Request, res: Response) => {
   }
 };
 
+// Função para criar um pedido para um cliente
+export const criarPedidoParaCliente = async (req: Request, res: Response) => {
+  try {
+    const clienteId = parseInt(req.params.idCliente, 10);
+    const { data } = req.body;
+
+    // Verifica se o cliente existe
+    const cliente = await Cliente.findByPk(clienteId);
+
+    if (!cliente) {
+      return res.status(404).json({ message: "Cliente não encontrado" });
+    }
+
+    // Cria o pedido para o cliente
+    const novoPedido = await Pedido.create({
+      id_cliente: clienteId,
+      data: new Date(data)
+    });
+
+    res.status(201).json(novoPedido);
+  } catch (error) {
+    console.error("Erro ao criar pedido para cliente:", error);
+    res.status(500).json({ message: "Erro ao criar pedido para cliente" });
+  }
+};
+
+// Função para recuperar um cliente e seus pedidos
+export const getClienteComPedidos = async (req: Request, res: Response) => {
+  try {
+    const clienteId = parseInt(req.params.idCliente, 10);
+
+    // Verifica se o cliente existe
+    const cliente = await Cliente.findByPk(clienteId, {
+      include: [{ model: Pedido, as: "Pedidos" }]
+    });
+
+    if (!cliente) {
+      return res.status(404).json({ message: "Cliente não encontrado" });
+    }
+
+    res.json(cliente);
+  } catch (error) {
+    console.error("Erro ao buscar cliente com pedidos:", error);
+    res.status(500).json({ message: "Erro ao buscar cliente com pedidos" });
+  }
+};
+
 // Buscar pedido por ID e retornar objetos separados para pedido e cliente
 export const getPedidoById = async (req: Request, res: Response) => {
   try {

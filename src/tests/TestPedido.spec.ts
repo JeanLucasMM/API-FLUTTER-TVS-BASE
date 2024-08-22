@@ -45,6 +45,51 @@ describe("Teste da Rota incluirPedido", () => {
   });
 });
 
+describe("Integração Cliente e Pedido", () => {
+  let clienteId: number;
+
+  beforeAll(async () => {
+    // Criação de um cliente para os testes
+    const cliente = await Cliente.create({
+      nome: "Maria",
+      sobrenome: "Fernandes",
+      cpf: "98765432100"
+    });
+
+    clienteId = cliente.id;
+  });
+
+  it("Deve criar um pedido para o cliente e verificar se está associado corretamente", async () => {
+    const novoPedido = {
+      data: new Date()
+    };
+
+    // Cria o pedido para o cliente
+    const response = await request(app).post(`/clientes/${clienteId}/pedidos`).send(novoPedido);
+
+    expect(response.status).toBe(201);
+    expect(response.body).toHaveProperty("id");
+    expect(response.body).toHaveProperty("id_cliente", clienteId);
+  });
+
+  it("Deve recuperar um cliente e verificar se os pedidos associados são retornados", async () => {
+    // Recupera o cliente com seus pedidos
+    const response = await request(app).get(`/clientes/${clienteId}/pedidos`);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty("id", clienteId);
+    expect(response.body).toHaveProperty("Pedidos");
+    expect(response.body.Pedidos).toBeInstanceOf(Array);
+    expect(response.body.Pedidos.length).toBeGreaterThan(0); // Verifica se há pedidos associados
+  });
+
+  afterAll(async () => {
+    // Limpeza dos dados criados durante os testes
+    await Pedido.destroy({ where: { id_cliente: clienteId } });
+    await Cliente.destroy({ where: { id: clienteId } });
+  });
+});
+
 describe("Teste da Rota getPedidoById", () => {
   it("Deve retornar o pedido correto quando o id é válido", async () => {
     const idPedido = 1; // Supondo que este seja um ID válido existente no seu banco de dados
